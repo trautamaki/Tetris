@@ -76,28 +76,56 @@ void MainWindow::draw() {
         QBrush(Qt::red)
     };
 
+    // Remove old graphics
+    for ( QGraphicsRectItem* g : graphics_ ) {
+        delete g;
+    }
+
+    graphics_.clear();
+
     // Draw the field
     for ( int x = 0; x < COLUMNS; ++x ) {
         for ( int y = 0; y < ROWS; ++y ) {
-
             if ( field_.at(x).at(y) == 0 ) {
                 continue;
             } else if ( field_.at(x).at(y) == 1 ) {
-                //QGraphicsRectItem* square =
-                scene_->addRect(x*SQUARE_SIDE,
-                                y*SQUARE_SIDE,
-                                SQUARE_SIDE,
-                                SQUARE_SIDE,
-                                blackPen,
-                                colours.at(current_shape_));
+                QGraphicsRectItem* square =
+                        scene_->addRect(x*SQUARE_SIDE,
+                                        y*SQUARE_SIDE,
+                                        SQUARE_SIDE,
+                                        SQUARE_SIDE,
+                                        blackPen,
+                                        colours.at(current_shape_));
+
+                graphics_.push_back(square);
             } else if ( field_.at(x).at(y) >= 2 ) {
-                //QGraphicsRectItem* square =
-                scene_->addRect(x*SQUARE_SIDE,
-                                y*SQUARE_SIDE,
-                                SQUARE_SIDE,
-                                SQUARE_SIDE,
-                                blackPen,
-                                colours.at(4));
+                QGraphicsRectItem* square =
+                        scene_->addRect(x*SQUARE_SIDE,
+                                        y*SQUARE_SIDE,
+                                        SQUARE_SIDE,
+                                        SQUARE_SIDE,
+                                        blackPen,
+                                        colours.at(4));
+
+                graphics_.push_back(square);
+            }
+        }
+    }
+}
+
+void MainWindow::gravity() {
+    int dy = 1;
+
+    // Add 'gravity' for pieces with id 1 (active)
+    for ( int x = 0; x < COLUMNS; ++x ) {
+        for ( int y = 0; y < ROWS; ++y ) {
+            if ( field_.at(x).at(y) != 1 ) {
+                continue;
+            } else if ( field_.at(x).at(y) == 1 ) {
+                qDebug() << x << y << ":" << field_.at(x).at(y);
+                field_.at(x).at(y) = 0;
+                field_.at(x).at(y + dy) = 1;
+                break;
             }
         }
     }
@@ -111,7 +139,6 @@ void MainWindow::createBlock(int tetromino) {
 
     switch (tetromino) {
     case HORIZONTAL:
-        qDebug() << "create";
 
         for ( int x = 0; x < 4; ++x ) {
             for ( int y = 0; y < 4; ++y ) {
@@ -131,6 +158,7 @@ void MainWindow::gameloop() {
         createBlock(first);
     }
     draw();
+    gravity();
 }
 
 void MainWindow::drawGrid() {

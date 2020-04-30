@@ -75,6 +75,10 @@ private:
      */
     void draw();
     /**
+     * @brief gravity
+     */
+    void gravity();
+    /**
      * @brief createBlock
      * @param block_id
      * Create a block with given id
@@ -119,6 +123,8 @@ private:
         { 0, 0, 0, 1 },
         { 0, 0, 0, 1 }
     };
+
+    std::vector< QGraphicsRectItem* > graphics_;
 };
 
 #endif // MAINWINDOW_HH
