@@ -65,7 +65,26 @@ void MainWindow::gameloop() {
 
 }
 
+void MainWindow::drawGrid() {
+    QPen blackPen(Qt::gray);
+    blackPen.setWidth(1);
+
+    for ( int i = 0; i < ROWS; ++i ) {
+        scene_->addLine(0,            i * SQUARE_SIDE,
+                        BORDER_RIGHT, i * SQUARE_SIDE,
+                        blackPen);
+    }
+
+    for ( int j = 0; j < ROWS; ++j ) {
+        scene_->addLine(j * SQUARE_SIDE, 0,
+                        j * SQUARE_SIDE, BORDER_DOWN,
+                        blackPen);
+    }
+}
+
 void MainWindow::game() {
+
+    drawGrid();
 
     // Set up timer and start game loop
     timer_.setSingleShot(false);

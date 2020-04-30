@@ -70,6 +70,10 @@ private:
      */
     void keyPressEvent(QKeyEvent* event);
     /**
+     * @brief drawGrid
+     */
+    void drawGrid();
+    /**
      * @brief gameloop
      * Main loop of the game
      */
@@ -79,6 +83,13 @@ private:
      * Set up variables to begin gameloop
      */
     void game();
+
+    std::vector< std::vector< int > > shape_1 = {
+        { 0, 0, 0, 0 },
+        { 0, 0, 0, 0 },
+        { 0, 0, 0, 0 },
+        { 1, 1, 1, 1 }
+    };
 };
 
 #endif // MAINWINDOW_HH
