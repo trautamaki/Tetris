@@ -110,29 +110,11 @@ void MainWindow::draw() {
 void MainWindow::moveBlock(int d) {
     int dx = d == RIGHT ? 1 : -1;
 
-    // Move pieces laterally that are id 1 (active)
-    for ( int x = 0; x < COLUMNS; ++x ) {
-        for ( int y = 0; y < ROWS; ++y ) {
-            if ( field_.at(x).at(y) != 1 ) {
-                continue;
-            } else if ( field_.at(x).at(y) == 1 ) {
-                qDebug() << x << y << ":" << field_.at(x).at(y);
-                field_.at(x).at(y) = 0;
-                field_.at(x + dx).at(y) = 1;
-                break;
-            }
-        }
-    }
-}
-
-void MainWindow::gravity() {
-    int dy = 1;
-
-
+    // Move each piece's coordinates
     for ( int px = 0; px < 4; ++px ) {
         for ( int py = 0; py < 4; ++py ) {
-            position_.at(px).at(py) = { position_.at(px).at(py).x,
-                                      position_.at(px).at(py).y + 1 };
+            position_.at(px).at(py) = { position_.at(px).at(py).x + dx,
+                                        position_.at(px).at(py).y };
 
             qDebug() << position_.at(px).at(py).x <<position_.at(px).at(py).y;
         }
@@ -149,6 +131,48 @@ void MainWindow::gravity() {
         }
     }
 
+    // Re-assign '1' to the new position
+    for ( int x = 0; x < COLUMNS; ++x ) {
+        for ( int y = 0; y < ROWS; ++y ) {
+            for ( int px = 0; px < 4; ++px ) {
+                for ( int py = 0; py < 4; ++py ) {
+                    if ( (x == position_.at(px).at(py).x &&
+                         y == position_.at(px).at(py).y) &&
+                         current_->at(px).at(py) == 1 ) {
+
+                        field_.at(x).at(y) = 1;
+                    }
+                }
+            }
+        }
+    }
+}
+
+void MainWindow::gravity() {
+    int dy = 1;
+
+    // Move each piece's coordinates
+    for ( int px = 0; px < 4; ++px ) {
+        for ( int py = 0; py < 4; ++py ) {
+            position_.at(px).at(py) = { position_.at(px).at(py).x,
+                                        position_.at(px).at(py).y + 1 };
+
+            qDebug() << position_.at(px).at(py).x <<position_.at(px).at(py).y;
+        }
+    }
+
+    // Clear the field
+    for ( int x = 0; x < COLUMNS; ++x ) {
+        for ( int y = 0; y < ROWS; ++y ) {
+            if ( field_.at(x).at(y) != 1 ) {
+                continue;
+            } else if ( field_.at(x).at(y) == 1 ) {
+                field_.at(x).at(y) = 0;
+            }
+        }
+    }
+
+    // Re-assign '1' to the new position
     for ( int x = 0; x < COLUMNS; ++x ) {
         for ( int y = 0; y < ROWS; ++y ) {
             for ( int px = 0; px < 4; ++px ) {
