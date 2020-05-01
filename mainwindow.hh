@@ -55,6 +55,7 @@ private:
                           NUMBER_OF_TETROMINOS };
 
     enum DIRECTIONS { LEFT, RIGHT, DOWN };
+    enum OBSTACLE { NONE, WALL, FLOOR, TETROMINO };
 
     // For randomly selecting the next dropping tetromino
     std::default_random_engine randomEng;
@@ -74,6 +75,15 @@ private:
      * @param event
      */
     void draw();
+    /**
+     * @brief checkSpace
+     * @param d: direction
+     * @return 0: free
+     *         1: wall
+     *         2: floor
+     *         3: tetromino
+     */
+    int checkSpace(int d);
     /**
      * @brief moveBlock
      * @param d: direction
