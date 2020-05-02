@@ -129,6 +129,38 @@ void MainWindow::rotateTetromino() {
     draw();
 }
 
+void MainWindow::clearRow(int row) {
+    if ( DEBUG ) qDebug() << "Clearing row " << row;
+
+    // Clear the row
+    for ( int x = 0; x < COLUMNS; ++x ) {
+        if ( field_.at(x).at(row) < 2 ) {
+            field_.at(x).at(row) = 0;
+        }
+    }
+
+    // Move rows above 'row' 1 step down
+    for ( int x = 0; x < COLUMNS; ++x ) {
+        for ( int y = ROWS; y > 0; --y ) {
+            if ( y < row && y > 1 ) {
+                field_.at(x).at(y+1) = field_.at(x).at(y);
+                field_.at(x).at(y) = 0;
+            }
+        }
+    }
+}
+
+bool MainWindow::checkRow(int row) {
+    if ( DEBUG ) qDebug() << "Checking row " << row;
+    for ( int x = 0; x < COLUMNS; ++x ) {
+        if ( field_.at(x).at(row) < 2 ) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 void MainWindow::finishTetromino() {
     for ( int px = 0; px < 4; ++px ) {
         for ( int py = 0; py < 4; ++py ) {
@@ -144,6 +176,13 @@ void MainWindow::finishTetromino() {
     current_ = nullptr;
     createBlock(distr(randomEng));
     if ( DEBUG ) qDebug() << "Tetromino finished " << current_shape_;
+
+    for ( int y = 0; y < ROWS; ++y ) {
+        if ( checkRow(y) ) {
+            if ( DEBUG ) qDebug() << "Row " << y << " is to be cleared";
+            clearRow(y);
+        }
+    }
 }
 
 int MainWindow::checkSpace(int d) {
@@ -186,9 +225,11 @@ int MainWindow::checkSpace(int d) {
             if ( (position_.at(px).at(py).x + dx > 0 &&
                   position_.at(px).at(py).x + dx < COLUMNS) &&
 
-               ( field_.at(position_.at(px).at(py).x + dx)
-                       .at(position_.at(px).at(py).y + dy) > 1 ) &&
-                 current_->at(px).at(py) == 1 ) {
+                 (position_.at(px).at(py).y + dy < ROWS) &&
+
+                 (field_.at(position_.at(px).at(py).x + dx)
+                        .at(position_.at(px).at(py).y + dy) > 1 ) &&
+                  current_->at(px).at(py) == 1 ) {
 
                 if ( DEBUG ) qDebug() << "Movement blocked: tetromino";
                 return TETROMINO;
@@ -334,5 +375,5 @@ void MainWindow::game() {
     // Set up timer and start game loop
     timer_.setSingleShot(false);
     connect(&timer_, &QTimer::timeout, this, &MainWindow::gameloop);
-    timer_.start(1000);
+    timer_.start(100);
 }

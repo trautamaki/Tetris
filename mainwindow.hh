@@ -80,6 +80,16 @@ private:
      */
     void rotateTetromino();
     /**
+     * @brief clearRow
+     * @param row
+     */
+    void clearRow(int row);
+    /**
+     * @brief checkRow
+     * @param row
+     */
+    bool checkRow(int row);
+    /**
      * @brief finishTetromino
      * Move a tetromino to be part of the floor
      */
