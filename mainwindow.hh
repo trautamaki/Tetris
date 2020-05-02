@@ -81,6 +81,19 @@ private:
      */
     void draw();
     /**
+     * @brief allClearBelow
+     * @param row
+     * @return true if there are no
+     * obstacles below at given row
+     */
+    bool allClearBelow(int row);
+    /**
+     * @brief moveToBottom
+     * Move tetromino as low as possible
+     * in one tick
+     */
+    void moveToBottom();
+    /**
      * @brief rotateTetromino
      */
     void rotateTetromino();
@@ -102,12 +115,21 @@ private:
     /**
      * @brief checkSpace
      * @param d: direction
+     * @param r: range
      * @return 0: free
      *         1: wall
      *         2: floor
      *         3: tetromino
      */
-    int checkSpace(int d);
+    int checkSpace(int d, int r);
+    /**
+     * @brief setAbsolutePosition
+     * @param p_x: x coordinate in the tetromino 4x4
+     * @param p_y: y coordinate in the tetromino 4x4
+     * @param x: x coordinate to go to
+     * @param y: y coordinate to go to
+     */
+    void setAbsolutePosition(int p_x, int p_y, int x, int y);
     /**
      * @brief moveBlock
      * @param d: direction

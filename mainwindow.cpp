@@ -40,6 +40,7 @@ MainWindow::~MainWindow() {
 void MainWindow::keyPressEvent(QKeyEvent* event) {
     if ( event->key() == Qt::Key_Down || event->key() == Qt::Key_S ) {
         fast_ = true;
+        moveBlock(DOWN);
     }
 
     if ( event->key() == Qt::Key_Left || event->key() == Qt::Key_A ) {
@@ -55,7 +56,7 @@ void MainWindow::keyPressEvent(QKeyEvent* event) {
     }
 
     if ( event->key() == Qt::Key_Space ) {
-        //move_to_bottom();
+        moveToBottom();
     }
 }
 
@@ -113,6 +114,79 @@ void MainWindow::draw() {
 
                 graphics_.push_back(square);
             }
+        }
+    }
+}
+
+// Helper to check if all values are false in vector< bool >
+bool allTrue(std::vector< bool >& vec) {
+    for ( bool b : vec ) {
+        if ( !b ) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool MainWindow::allClearBelow(int col) {
+    for ( int y = 0; y < ROWS; ++y ) {
+        if ( field_.at(col).at(y) > 1 ) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+void MainWindow::moveToBottom() {
+    bool all_the_way = false;
+    int delta_y = 0;
+
+    std::vector< int > piece_delta_y;
+    std::vector< bool >piece_to_bottom(4, false);
+    std::vector< int >piece_to_bottom_y(4, ROWS + 1);
+
+    int i = 0;
+    for ( int px = 0; px < 4; ++px ) {
+        for ( int py = 0; py < 4; ++py ) {
+            if ( current_->at(px).at(py) != 1 ) continue;
+
+            if ( allClearBelow(position_.at(px).at(py).x) ) {
+                piece_to_bottom_y.at(i) = ROWS - position_.at(px).at(py).y - 1;
+                piece_to_bottom.at(i) = true;
+            }
+
+            all_the_way = allTrue(piece_to_bottom);
+            if ( all_the_way ) {
+                break;
+            }
+
+            int j = 0;
+            for ( int x = 0; x < COLUMNS; ++x ) {
+                for ( int y = 0; y < ROWS; ++y ) {
+                    if ( x == position_.at(px).at(py).x &&
+                         field_.at(x).at(y) > 1 ) {
+
+                        int candidate_y = y - position_.at(px).at(py).y - 1;
+                        qDebug() << candidate_y;
+                        piece_delta_y.push_back(candidate_y);
+                    }
+                }
+                ++j;
+            }
+            ++i;
+        }
+    }
+
+    delta_y = all_the_way ? *std::min_element(piece_to_bottom_y.begin(),
+                                              piece_to_bottom_y.end())
+                          : *std::min_element(piece_delta_y.begin(),
+                                              piece_delta_y.end());
+
+    for( int i = 0; i < 4; i++ ) {
+        for( int j = 0; j < 4; j++ ) {
+            setAbsolutePosition(i, j, position_.at(i).at(j).x,
+                                      position_.at(i).at(j).y + delta_y);
         }
     }
 }
@@ -215,20 +289,20 @@ void MainWindow::finishTetromino() {
     }
 }
 
-int MainWindow::checkSpace(int d) {
+int MainWindow::checkSpace(int d, int r = 1) {
     // Default delty x and delta y
     int dx = 0;
     int dy = 0;
 
     switch ( d ) {
     case LEFT:
-        dx = -1;
+        dx = -r;
         break;
     case RIGHT:
-        dx = 1;
+        dx = r;
         break;
     case DOWN:
-        dy = 1;
+        dy = r;
         break;
     }
 
@@ -251,11 +325,6 @@ int MainWindow::checkSpace(int d) {
                 return FLOOR;
             }
 
-            qDebug() << "1:" << position_.at(px).at(py).x + dx;
-            qDebug() << "2:" << position_.at(px).at(py).y + dy;
-            qDebug() << "3:" << field_.at(position_.at(px).at(py).x + dx)
-                        .at(position_.at(px).at(py).y + 1);
-
             // Check for other blocks
             if ( (position_.at(px).at(py).x + dx > 0 &&
                   position_.at(px).at(py).x + dx < COLUMNS) &&
@@ -274,12 +343,51 @@ int MainWindow::checkSpace(int d) {
     return NONE;
 }
 
+void MainWindow::setAbsolutePosition(int p_x, int p_y, int x, int y) {
+    // Move piece's coordinates
+
+    position_.at(p_x).at(p_y) = { x, y };
+
+
+    // Clear the field
+    for ( int x = 0; x < COLUMNS; ++x ) {
+        for ( int y = 0; y < ROWS; ++y ) {
+            if ( field_.at(x).at(y) != 1 ) {
+                continue;
+            } else if ( field_.at(x).at(y) == 1 ) {
+                field_.at(x).at(y) = 0;
+            }
+        }
+    }
+
+    // Re-assign '1' to the new position
+    for ( int x = 0; x < COLUMNS; ++x ) {
+        for ( int y = 0; y < ROWS; ++y ) {
+            for ( int px = 0; px < 4; ++px ) {
+                for ( int py = 0; py < 4; ++py ) {
+                    if ( (x == position_.at(px).at(py).x &&
+                          y == position_.at(px).at(py).y) &&
+                         current_->at(px).at(py) == 1 ) {
+
+                        field_.at(x).at(y) = 1;
+                    }
+                }
+            }
+        }
+    }
+
+    // Redraw the field after movement
+    draw();
+}
+
 void MainWindow::moveBlock(int d) {
     if ( current_ == nullptr ) return;
 
     // Default delty x and delta y
     int dx = 0;
     int dy = 0;
+
+    int r = 1;
 
     switch ( d ) {
     case LEFT:
@@ -290,14 +398,18 @@ void MainWindow::moveBlock(int d) {
         break;
     case DOWN:
         fast_ ? dy = 2 : dy = 1;
+        fast_ ? r = 2 : r = 1;
         break;
     }
 
-    int status = checkSpace(d);
+    int status = checkSpace(d, r);
     switch ( status ) {
     case TETROMINO:
         if ( d != DOWN ) {
             return;
+        }
+        if ( fast_ ) {
+            moveToBottom();
         }
         finishTetromino();
         break;
@@ -305,6 +417,9 @@ void MainWindow::moveBlock(int d) {
         return;
         break;
     case FLOOR:
+        if ( fast_ ) {
+            moveToBottom();
+        }
         finishTetromino();
         break;
     }
@@ -402,5 +517,5 @@ void MainWindow::game() {
     // Set up timer and start game loop
     timer_.setSingleShot(false);
     connect(&timer_, &QTimer::timeout, this, &MainWindow::gameloop);
-    timer_.start(300);
+    timer_.start(1000);
 }
