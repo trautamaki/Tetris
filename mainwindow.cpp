@@ -103,7 +103,7 @@ void MainWindow::draw() {
                                         SQUARE_SIDE,
                                         SQUARE_SIDE,
                                         blackPen,
-                                        colours.at(current_shape_));
+                                        colours.at(field_.at(x).at(y) - 2));
 
                 graphics_.push_back(square);
             }
@@ -317,22 +317,15 @@ void MainWindow::createBlock(int tetromino) {
     int start_x = 4;
     int start_y = 0;
 
-    tetromino = HORIZONTAL;
-
-    switch (tetromino) {
-    case HORIZONTAL:
-
-        for ( int x = 0; x < 4; ++x ) {
-            for ( int y = 0; y < 4; ++y ) {
-                position_.at(x).at(y) = { start_x + x, start_y + y };
-                field_.at(start_x + x).at(start_y + y) = shape_1.at(x).at(y);
-                current_shape_ = tetromino;
-                current_ = &shape_1;
-            }
+    for ( int x = 0; x < 4; ++x ) {
+        for ( int y = 0; y < 4; ++y ) {
+            position_.at(x).at(y) = { start_x + x, start_y + y };
+            field_.at(start_x + x).at(start_y + y) = shape_1.at(x).at(y);
+            current_shape_ = tetromino;
+            current_ = &types_.at(tetromino);
         }
-
-        break;
     }
+
 }
 
 void MainWindow::gameloop() {
@@ -374,5 +367,5 @@ void MainWindow::game() {
     // Set up timer and start game loop
     timer_.setSingleShot(false);
     connect(&timer_, &QTimer::timeout, this, &MainWindow::gameloop);
-    timer_.start(100);
+    timer_.start(300);
 }

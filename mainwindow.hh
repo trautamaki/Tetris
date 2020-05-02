@@ -6,7 +6,8 @@
 #include <QTimer>
 #include <random>
 
-//using Tetromino = std::vector< QGraphicsRectItem* >;
+using Tetromino = std::vector< std::vector< int > >;
+
 
 namespace Ui {
 class MainWindow;
@@ -160,6 +161,63 @@ private:
         { 0, 0, 1, 0 },
         { 0, 0, 1, 0 }
     };
+
+    // #
+    // ###
+    std::vector< std::vector< int > > shape_2 = {
+        { 0, 0, 1, 1 },
+        { 0, 0, 1, 0 },
+        { 0, 0, 1, 0 },
+        { 0, 0, 0, 0 }
+    };
+
+    //   #
+    // ###
+    std::vector< std::vector< int > > shape_3 = {
+        { 0, 0, 1, 1 },
+        { 0, 0, 1, 0 },
+        { 0, 0, 1, 0 },
+        { 0, 0, 0, 0 }
+    };
+
+    // ##
+    // ##
+    std::vector< std::vector< int > > shape_4 = {
+        { 0, 0, 0, 0 },
+        { 1, 1, 0, 0 },
+        { 1, 1, 0, 0 },
+        { 0, 0, 0, 0 }
+    };
+
+    //  ##
+    // ##
+    std::vector< std::vector< int > > shape_5 = {
+        { 0, 1, 0, 0 },
+        { 0, 1, 1, 0 },
+        { 0, 0, 1, 0 },
+        { 0, 0, 0, 0 }
+    };
+
+    //  #
+    // ###
+    std::vector< std::vector< int > > shape_6 = {
+        { 0, 0, 1, 0 },
+        { 0, 1, 1, 0 },
+        { 0, 0, 1, 0 },
+        { 0, 0, 0, 0 }
+    };
+
+    // ##
+    //  ##
+    std::vector< std::vector< int > > shape_7 = {
+        { 0, 0, 1, 0 },
+        { 0, 1, 1, 0 },
+        { 0, 1, 0, 0 },
+        { 0, 0, 0, 0 }
+    };
+
+    std::vector< Tetromino > types_ = { shape_1, shape_2, shape_3,
+                                        shape_4, shape_5, shape_6, shape_7 };
 
     std::vector< QGraphicsRectItem* > graphics_;
 };
