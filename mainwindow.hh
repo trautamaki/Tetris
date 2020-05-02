@@ -8,7 +8,6 @@
 
 using Tetromino = std::vector< std::vector< int > >;
 
-
 namespace Ui {
 class MainWindow;
 }
@@ -165,16 +164,16 @@ private:
     // #
     // ###
     std::vector< std::vector< int > > shape_2 = {
-        { 0, 0, 1, 1 },
-        { 0, 0, 1, 0 },
-        { 0, 0, 1, 0 },
+        { 0, 1, 1, 0 },
+        { 0, 1, 0, 0 },
+        { 0, 1, 0, 0 },
         { 0, 0, 0, 0 }
     };
 
     //   #
     // ###
     std::vector< std::vector< int > > shape_3 = {
-        { 0, 0, 1, 1 },
+        { 0, 1, 1, 0 },
         { 0, 0, 1, 0 },
         { 0, 0, 1, 0 },
         { 0, 0, 0, 0 }

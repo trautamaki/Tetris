@@ -125,19 +125,32 @@ void MainWindow::rotateTetromino() {
     }
 
     // Move to right if wall is in way
+    int r = 0;
+    int l = 0;
     for( int i = 0; i < 4; i++ ) {
         for( int j = 0; j < 4; j++ ) {
-            qDebug() << position_.at(j).at(0).x;
-            //qDebug() << current_->at(position_.at(j).at(0).x);
-            if ( position_.at(j).at(0).x < 0 &&
-                 current_->at(i).at(j) == 1) {
-                moveBlock(RIGHT);
+            if ( temp->at(i).at(j) != 1 ) continue;
+
+            if ( position_.at(i).at(j).x < 0 ) {
+                r++;
+            } else if ( position_.at(i).at(j).x > COLUMNS - 1 ) {
+                l++;
+            } else if ( field_.at(position_.at(i).at(j).x).at(position_.at(i).at(j).y) > 1 ) {
+                // Real block in the way. Do nothing
+                return;
             }
         }
     }
 
-    current_ = temp;
+    for ( int i = 0; i < r; ++i ) {
+        moveBlock(RIGHT);
+    }
 
+    for ( int i = 0; i < l; ++i ) {
+        moveBlock(LEFT);
+    }
+
+    current_ = temp;
     draw();
 }
 
@@ -217,6 +230,7 @@ int MainWindow::checkSpace(int d) {
         for ( int py = 0; py < 4; ++py ) {
             if ( current_->at(px).at(py) != 1 ) continue;
 
+
             // Check for walls
             if ( (position_.at(px).at(py).x + dx >= COLUMNS || // Right wall
                   position_.at(px).at(py).x + dx < 0) ) {      // Left wall
@@ -230,6 +244,11 @@ int MainWindow::checkSpace(int d) {
                 if ( DEBUG ) qDebug() << "Movement blocked: floor";
                 return FLOOR;
             }
+
+            qDebug() << "1:" << position_.at(px).at(py).x + dx;
+            qDebug() << "2:" << position_.at(px).at(py).y + dy;
+            qDebug() << "3:" << field_.at(position_.at(px).at(py).x + dx)
+                        .at(position_.at(px).at(py).y + 1);
 
             // Check for other blocks
             if ( (position_.at(px).at(py).x + dx > 0 &&
