@@ -30,6 +30,9 @@ MainWindow::MainWindow(QWidget *parent) :
     distr = std::uniform_int_distribution<int>(0, NUMBER_OF_TETROMINOS - 1);
     distr(randomEng);
 
+    connect(ui->pauseButton, &QPushButton::clicked,
+            this, &MainWindow::pauseGame);
+
     // Start game
     game();
 }
@@ -40,6 +43,11 @@ MainWindow::~MainWindow() {
 
 void MainWindow::updateUI() {
     ui->pointsLabel->setText(QString::number(points_));
+}
+
+void MainWindow::pauseGame() {
+    pause_ = !pause_;
+    ui->pauseButton->setText(pause_ ? "Resume" : "Pause");
 }
 
 void MainWindow::keyPressEvent(QKeyEvent* event) {
@@ -146,6 +154,8 @@ bool MainWindow::allClearBelow(int col) {
 }
 
 void MainWindow::moveToBottom() {
+    if ( pause_ ) return;
+
     bool all_the_way = false;
     int delta_y = 0;
 
@@ -199,6 +209,7 @@ void MainWindow::moveToBottom() {
 
 void MainWindow::rotateTetromino() {
     if ( current_ == nullptr || current_shape_ == SQUARE ) return;
+    if ( pause_ ) return;
 
     std::vector< std::vector< int > >* temp =
             new std::vector< std::vector< int > >;
@@ -391,6 +402,7 @@ void MainWindow::setAbsolutePosition(int p_x, int p_y, int x, int y) {
 
 void MainWindow::moveBlock(int d) {
     if ( current_ == nullptr ) return;
+    if ( pause_ ) return;
 
     // Default delty x and delta y
     int dx = 0;

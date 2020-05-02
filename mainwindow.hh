@@ -69,6 +69,11 @@ private:
      */
     void updateUI();
     /**
+     * @brief pauseGame
+     * Pauses/resumes the game
+     */
+    void pauseGame();
+    /**
      * @brief keyPressEvent
      * @param event
      * Track keyboard events
