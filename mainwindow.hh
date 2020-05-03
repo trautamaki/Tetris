@@ -39,6 +39,8 @@ private slots:
 
     void on_scoreBoardButton_clicked();
 
+    void on_endGameButton_clicked();
+
 private:
     bool DEBUG = true;
     Ui::MainWindow *ui;
@@ -231,6 +233,7 @@ private:
     int seconds_ = 0;
     int minutes_ = 0;
 
+    int points_per_row_ = EASY;
 
     struct tetromino_pos {
         int x;
@@ -334,9 +337,21 @@ private:
 
     // Difficulty defines the rate at which
     // tetrominos fall (clock tick delay).
-    enum DIFFICULTY { INSANE = 150,
-                      MEDIUM = 400,
-                      EASY   = 800 };
+    enum DIFFICULTY { EASY,
+                      MEDIUM,
+                      INSANE };
+
+    std::vector< int > speeds = {
+        800,
+        400,
+        150
+    };
+
+    std::vector< int > points = {
+        10,
+        15,
+        25
+    };
 
     // Default difficulty
     int difficulty_ = EASY;

@@ -340,7 +340,7 @@ void MainWindow::clearRow(int row) {
         }
     }
 
-    points_ += 10;
+    points_ += points_per_row_;
     updateUI();
 }
 
@@ -679,11 +679,14 @@ void MainWindow::game() {
 
 void MainWindow::on_startButton_clicked() {
     if ( ui->easyRadio->isChecked() ) {
-        difficulty_ = EASY;
+        difficulty_ = speeds.at(EASY);
+        points_per_row_ = points.at(EASY);
     } else if ( ui->mediumRadio->isChecked() ) {
-        difficulty_ = MEDIUM;
+        difficulty_ = speeds.at(MEDIUM);
+        points_per_row_ = points.at(MEDIUM);
     } else if ( ui->insaneRadio->isChecked() ) {
-        difficulty_ = INSANE;
+        difficulty_ = speeds.at(INSANE);
+        points_per_row_ = points.at(INSANE);
     }
 
     if ( ui->usernameLineEdit->text().toStdString() != "" ) {
@@ -692,6 +695,7 @@ void MainWindow::on_startButton_clicked() {
 
     ui->gameSetupGroupBox->setEnabled(false);
     ui->pauseButton->setEnabled(true);
+    ui->endGameButton->setEnabled(true);
 
     ui->graphicsView->setFocus();
     game();
@@ -700,4 +704,10 @@ void MainWindow::on_startButton_clicked() {
 void MainWindow::on_scoreBoardButton_clicked() {
     ScoreBoard* scoreBoard = new ScoreBoard(FILENAME);
     scoreBoard->show();
+}
+
+void MainWindow::on_endGameButton_clicked() {
+    gameOver();
+    ui->pauseButton->setEnabled(false);
+    ui->endGameButton->setEnabled(false);
 }
