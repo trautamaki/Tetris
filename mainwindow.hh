@@ -18,11 +18,10 @@
 using Tetromino = std::vector< std::vector< int > >;
 
 namespace Ui {
-class MainWindow;
+    class MainWindow;
 }
 
-class MainWindow : public QMainWindow
-{
+class MainWindow : public QMainWindow {
     Q_OBJECT
 
 public:
@@ -32,6 +31,7 @@ public:
 private slots:
     /**
      * @brief updateTime
+     * Updates the LCD displays above game field
      */
     void updateTime();
 
@@ -46,7 +46,7 @@ private:
     QGraphicsScene* scene_;
     QGraphicsScene* next_scene_;
 
-    const std::string FILENAME = "leaders.txt";
+    std::string FILENAME = "leaders.txt";
 
     // Constants describing scene coordinates
     const int BORDER_UP = 0;
@@ -79,23 +79,16 @@ private:
     enum DIRECTIONS { LEFT, RIGHT, DOWN };
     enum OBSTACLE { NONE, WALL, FLOOR, TETROMINO };
 
-    // Difficulty defines the rate at which
-    // tetrominos fall (clock tick delay).
-    enum DIFFICULTY { INSANE = 150,
-                      MEDIUM = 400,
-                      EASY   = 800 };
-
-    int difficulty_ = EASY;
-
     // For randomly selecting the next dropping tetromino
     std::default_random_engine randomEng;
     std::uniform_int_distribution<int> distr;
 
     // Game timer
     QTimer timer_;
+
     /**
      * @brief updateUI
-     * Update the UI elements
+     * Update the UI elements (points)
      */
     void updateUI();
     /**
@@ -106,17 +99,19 @@ private:
     /**
      * @brief keyPressEvent
      * @param event
-     * Track keyboard events
+     * Track keyboard press events
      */
     void keyPressEvent(QKeyEvent* event);
     /**
      * @brief keyReleaseEvent
      * @param event
+     * Track keyboard release events
      */
     void keyReleaseEvent(QKeyEvent* event);
     /**
      * @brief paintEvent
      * @param event
+     * Draw the whole field
      */
     void draw();
     /**
@@ -127,11 +122,11 @@ private:
     void drawNext();
     /**
      * @brief allClearBelow
-     * @param row
+     * @param col
      * @return true if there are no
-     * obstacles below at given row
+     *         obstacles below given row
      */
-    bool allClearBelow(int row);
+    bool allClearBelow(int col);
     /**
      * @brief moveToBottom
      * Move tetromino as low as possible
@@ -145,11 +140,13 @@ private:
     /**
      * @brief clearRow
      * @param row
+     * Clear a row and shift all above
      */
     void clearRow(int row);
     /**
      * @brief checkRow
      * @param row
+     * Check if a row could be cleared
      */
     bool checkRow(int row);
     /**
@@ -178,11 +175,13 @@ private:
     /**
      * @brief moveBlock
      * @param d: direction
-     * Move tetromino sideways
+     * Move tetromino left/right/down
      */
     void moveBlock(int d);
     /**
      * @brief gravity
+     * Move tetrommino 1 step down
+     * at each tick
      */
     void gravity();
     /**
@@ -190,7 +189,7 @@ private:
      * @param block_id
      * Create a block with given id
      */
-    void createBlock(int block_id);
+    void createBlock(int tetromino);
     /**
      * @brief drawGrid
      */
@@ -211,29 +210,34 @@ private:
      */
     void game();
 
+    // Holds the address of the active tetromino shape
     std::vector< std::vector< int > >* current_;
+    // Current shape id
     int current_shape_;
+    // Next shape id
     int next_shape_;
 
-    std::string username_ = "anonymous";
+    // Wheter to create a tetromino
+    bool create_ = true;
+
+    // Fast gravity when 'Down'-key is pressed
+    bool fast_ = false;
+
+    bool pause_ = false;
+    int points_ = 0;
+
+    // Game timer
+    QTimer* clock_;
+    int seconds_ = 0;
+    int minutes_ = 0;
+
 
     struct tetromino_pos {
         int x;
         int y;
     };
 
-    bool create_ = true;
-
-    // Fast gravity
-    bool fast_ = false;
-
-    bool pause_ = false;
-    int points_ = 0;
-
-    QTimer* clock_;
-    int seconds_ = 0;
-    int minutes_ = 0;
-
+    // 4*4 that holds the information of each piece in the tetromino
     std::vector< std::vector< tetromino_pos > > position_;
 
     // Whole game field, initialized with size COLUMNS*ROWS
@@ -308,7 +312,13 @@ private:
     std::vector< Tetromino > types_ = { shape_1, shape_2, shape_3,
                                         shape_4, shape_5, shape_6, shape_7 };
 
-    // Brushes
+    std::vector< QGraphicsRectItem* > graphics_;
+
+    /*
+     *  Game tuneables
+     */
+
+    // Brushes. Ordered by 'TETROMINO_KIND'
     std::vector< QBrush > colours_ = {
         QBrush(Qt::cyan),
         QBrush(Qt::blue),
@@ -319,7 +329,17 @@ private:
         QBrush(Qt::red)
     };
 
-    std::vector< QGraphicsRectItem* > graphics_;
+    // Default username
+    std::string username_ = "anonymous";
+
+    // Difficulty defines the rate at which
+    // tetrominos fall (clock tick delay).
+    enum DIFFICULTY { INSANE = 150,
+                      MEDIUM = 400,
+                      EASY   = 800 };
+
+    // Default difficulty
+    int difficulty_ = EASY;
 };
 
 #endif // MAINWINDOW_HH

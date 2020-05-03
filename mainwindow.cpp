@@ -145,8 +145,10 @@ void MainWindow::draw() {
     for ( int x = 0; x < COLUMNS; ++x ) {
         for ( int y = 0; y < ROWS; ++y ) {
             if ( field_.at(x).at(y) == 0 ) {
+                // Skip empty spots
                 continue;
             } else if ( field_.at(x).at(y) == 1 ) {
+                // Draw the active tetromino
                 QGraphicsRectItem* square =
                         scene_->addRect(x*SQUARE_SIDE,
                                         y*SQUARE_SIDE,
@@ -157,6 +159,7 @@ void MainWindow::draw() {
 
                 graphics_.push_back(square);
             } else if ( field_.at(x).at(y) >= 2 ) {
+                // Draw the stable tetrominos
                 QGraphicsRectItem* square =
                         scene_->addRect(x*SQUARE_SIDE,
                                         y*SQUARE_SIDE,
@@ -216,24 +219,28 @@ void MainWindow::moveToBottom() {
     int delta_y = 0;
 
     std::vector< int > piece_delta_y;
-    std::vector< bool >piece_to_bottom(4, false);
-    std::vector< int >piece_to_bottom_y(4, ROWS + 1);
+    std::vector< bool > piece_to_bottom(4, false);
+    std::vector< int > piece_to_bottom_y(4, ROWS + 1);
 
     int i = 0;
     for ( int px = 0; px < 4; ++px ) {
         for ( int py = 0; py < 4; ++py ) {
             if ( current_->at(px).at(py) != 1 ) continue;
 
+            // Check if all pieces can go directly to floor
             if ( allClearBelow(position_.at(px).at(py).x) ) {
                 piece_to_bottom_y.at(i) = ROWS - position_.at(px).at(py).y - 1;
                 piece_to_bottom.at(i) = true;
             }
 
+            // No need to continue loop if all
+            // can go to the floor
             all_the_way = allTrue(piece_to_bottom);
             if ( all_the_way ) {
                 break;
             }
 
+            // Calculate the possible delta y for each piece
             int j = 0;
             for ( int x = 0; x < COLUMNS; ++x ) {
                 for ( int y = 0; y < ROWS; ++y ) {
@@ -250,6 +257,8 @@ void MainWindow::moveToBottom() {
         }
     }
 
+    // Choose the smallest delta y from all pieces
+    // to only move as little as possible
     delta_y = all_the_way ? *std::min_element(piece_to_bottom_y.begin(),
                                               piece_to_bottom_y.end())
                           : *std::min_element(piece_delta_y.begin(),
@@ -267,10 +276,12 @@ void MainWindow::rotateTetromino() {
     if ( current_ == nullptr || current_shape_ == SQUARE ) return;
     if ( pause_ ) return;
 
+    // Copy the current tetromino to a temporary variable
     std::vector< std::vector< int > >* temp =
             new std::vector< std::vector< int > >;
     *temp = *current_;
 
+    // Rotation algorithm
     for( int i = 0; i < 4; i++ ) {
         for( int j = 0; j < 4; j++ ) {
             temp->at(j).at(4 - i - 1) = current_->at(i).at(j);
@@ -290,11 +301,13 @@ void MainWindow::rotateTetromino() {
                 l++;
             } else if ( field_.at(position_.at(i).at(j).x).at(position_.at(i).at(j).y) > 1 ) {
                 // Real block in the way. Do nothing
+                delete temp;
                 return;
             }
         }
     }
 
+    // Move tetrommino if needed
     for ( int i = 0; i < r; ++i ) {
         moveBlock(RIGHT);
     }
@@ -352,6 +365,8 @@ void MainWindow::finishTetromino() {
         }
     }
 
+    // Randomize next tetromino and show
+    // in the box next to game field
     current_ = nullptr;
     createBlock(next_shape_);
     next_shape_ = distr(randomEng);
@@ -360,7 +375,6 @@ void MainWindow::finishTetromino() {
 
     for ( int y = 0; y < ROWS; ++y ) {
         if ( checkRow(y) ) {
-            if ( DEBUG ) qDebug() << "Row " << y << " is to be cleared";
             clearRow(y);
         }
     }
@@ -397,7 +411,6 @@ int MainWindow::checkSpace(int d, int r = 1) {
             }
 
             if ( position_.at(px).at(py).y + dy >= ROWS ) {
-
                 if ( DEBUG ) qDebug() << "Movement blocked: floor";
                 return FLOOR;
             }
@@ -459,7 +472,7 @@ void MainWindow::moveBlock(int d) {
     if ( current_ == nullptr ) return;
     if ( pause_ ) return;
 
-    // Default delty x and delta y
+    // Default delta x and delta y
     int dx = 0;
     int dy = 0;
 
@@ -503,7 +516,6 @@ void MainWindow::moveBlock(int d) {
     // Move each piece's coordinates
     for ( int px = 0; px < 4; ++px ) {
         for ( int py = 0; py < 4; ++py ) {
-
             setAbsolutePosition(px, py, position_.at(px).at(py).x + dx,
                                         position_.at(px).at(py).y + dy);
         }
@@ -547,10 +559,11 @@ void MainWindow::createBlock(int tetromino) {
 
 void MainWindow::gameOver() {
     if ( DEBUG ) qDebug() << "Game over";
-    pause_ = true;
 
+    pause_ = true;
     clock_->stop();
 
+    // Save score to file 'FILENAME'
     std::string score =
               username_ + ":"
             + std::to_string(minutes_) + ":"
@@ -566,6 +579,7 @@ void MainWindow::gameOver() {
     outfile << score;
     outfile.close();
 
+    // Show player game stats and ask to play again
     QMessageBox::StandardButton replay;
     QString message = QString("You got %1 points. Time %2 min and %3 s. "
                               "Play again?")
@@ -579,15 +593,15 @@ void MainWindow::gameOver() {
         qApp->exit();
     }
 
+    // Re-enable game setup to start new game
     if ( replay == QMessageBox::Yes ) {
-        create_ = true;
-        game();
-        draw();
+        ui->gameSetupGroupBox->setEnabled(true);
     }
 }
 
 void MainWindow::gameloop() {
     if ( !pause_ ) {
+        // Create the first shape
         if ( create_ ) {
             create_ = !create_;
             next_shape_ = distr(randomEng);
@@ -638,6 +652,10 @@ void MainWindow::drawGrid() {
 }
 
 void MainWindow::game() {
+    // Reset all game stats
+    create_ = true;
+    minutes_ = 0;
+    seconds_ = 0;
     points_ = 0;
     field_.clear();
     position_.clear();
@@ -672,7 +690,6 @@ void MainWindow::on_startButton_clicked() {
         username_ = ui->usernameLineEdit->text().toStdString();
     }
 
-    ui->startButton->setEnabled(false);
     ui->gameSetupGroupBox->setEnabled(false);
     ui->pauseButton->setEnabled(true);
 
