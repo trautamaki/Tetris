@@ -313,8 +313,11 @@ void MainWindow::rotateTetromino() {
                 r++;
             } else if ( position_.at(i).at(j).x > COLUMNS - 1 ) {
                 l++;
-            } else if ( field_.at(position_.at(i).at(j).x).at(position_.at(i).at(j).y) > 1 ) {
-                // Real block in the way. Do nothing
+            } else if ( position_.at(i).at(j).y < 0 ||
+                        field_.at(position_.at(i).at(j).x)
+                        .at(position_.at(i).at(j).y) > 1) {
+
+                // Real block or ceiling in the way. Do nothing
                 delete temp;
                 return;
             }
@@ -543,7 +546,11 @@ void MainWindow::createBlock(int tetromino) {
     switch ( tetromino ) {
     case HORIZONTAL:
         start_x = 4;
-        start_y = -2;
+        start_y = -3;
+        break;
+    case SQUARE:
+        start_x = 4;
+        start_y = -1;
         break;
     case STEP_UP_RIGHT:
     case STEP_UP_LEFT:
@@ -551,22 +558,22 @@ void MainWindow::createBlock(int tetromino) {
     case RIGHT_CORNER:
     case PYRAMID:
         start_x = 4;
-        start_y = -1;
+        start_y = -2;
         break;
     }
 
-    start_x = 4;
-    start_y = 0;
-
     if ( DEBUG ) qDebug() << "Create block " << tetromino;
+
+    current_ = &types_.at(tetromino);
+    current_shape_ = tetromino;
 
     for ( int x = 0; x < 4; ++x ) {
         for ( int y = 0; y < 4; ++y ) {
             position_.at(x).at(y) = { start_x + x, start_y + y };
-            field_.at(start_x + x).at(start_y + y) = types_.at(tetromino)
-                                                           .at(x).at(y);
-            current_shape_ = tetromino;
-            current_ = &types_.at(tetromino);
+
+            if ( start_y + y < 0 ) continue;
+
+            field_.at(start_x + x).at(start_y + y) = current_->at(x).at(y);
         }
     }
 }
@@ -624,7 +631,7 @@ void MainWindow::gameloop() {
         }
 
         for ( int x = 0; x < 6; ++x ) {
-            for ( int y = 0; y < 5; ++y ) {
+            for ( int y = 0; y < 3; ++y ) {
                 // Check if spawn zone is occupied
                 //      -> game over
 
@@ -646,6 +653,15 @@ void MainWindow::gameloop() {
         timer_.setInterval(difficulty_);
         if ( DEBUG ) qDebug() << "Change speed to " << difficulty_;
     }
+
+    QDebug deb = qDebug();
+    for ( unsigned int i = 0; i < 4; ++i ) {
+        for ( unsigned int j = 0; j < 4; ++j ) {
+            deb << position_.at(i).at(j).x << ":" << position_.at(i).at(j).y;
+        }
+        deb << "\n";
+    }
+    qDebug();
 }
 
 void MainWindow::drawGrid() {
