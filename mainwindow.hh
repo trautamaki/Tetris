@@ -345,6 +345,12 @@ private:
 
     // Default difficulty
     int difficulty_ = MEDIUM;
+    // How often to increase difficulty in seconds
+    int DIFFICULTY_INTERVAL = 30;
+    // Maximum difficulty. Lower is harder
+    int MAX_DIFFICULTY = 70;
+    // How much to increase difficulty per DIFFICULTY_INTERVAL
+    int DIFFICULTY_STEP = 20;
 
     // How much to move a block per frame
     const int SPEED = 1;

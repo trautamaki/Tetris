@@ -94,6 +94,16 @@ void MainWindow::updateUI() {
 
 void MainWindow::updateTime() {
     seconds_++;
+
+    // Decrease interval by DIFFICULTY_STEP
+    // every DIFFICULTY_INTERVAL seconds to
+    // increase difficulty
+    if ( seconds_ % DIFFICULTY_INTERVAL == 0 && difficulty_ > MAX_DIFFICULTY ) {
+        difficulty_ -= DIFFICULTY_STEP;
+        timer_.setInterval(difficulty_);
+        if ( DEBUG ) qDebug() << "Change speed to " << difficulty_;
+    }
+
     if ( seconds_ == 60 ) {
         minutes_++;
         seconds_ = 0;
@@ -657,14 +667,6 @@ void MainWindow::gameloop() {
 
         draw();
         moveBlock(DOWN);
-    }
-
-    // Decrease interval by 20ms every 30 seconds
-    // to increase difficulty
-    if ( seconds_ == 30 && difficulty_ > 70 ) {
-        difficulty_ -= 20;
-        timer_.setInterval(difficulty_);
-        if ( DEBUG ) qDebug() << "Change speed to " << difficulty_;
     }
 }
 
