@@ -329,10 +329,11 @@ void MainWindow::rotateTetromino() {
             } else if ( position_.at(i).at(j).x > COLUMNS - 1 ) {
                 l++;
             } else if ( position_.at(i).at(j).y < 0 ||
+                        position_.at(i).at(j).y >= ROWS ||
                         field_.at(position_.at(i).at(j).x)
-                        .at(position_.at(i).at(j).y) > 1) {
+                              .at(position_.at(i).at(j).y) > 1) {
 
-                // Real block or ceiling in the way. Do nothing
+                // Real block, ceiling or floor in the way. Do nothing
                 delete temp;
                 return;
             }

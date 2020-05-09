@@ -79,12 +79,12 @@ std::vector< std::string > ScoreBoard::split(const std::string& s,
         std::string new_part = tmp.substr(0, tmp.find(delimiter));
         tmp = tmp.substr(tmp.find(delimiter)+1, tmp.size());
 
-        if( not (ignore_empty and new_part.empty()) ) {
+        if( !(ignore_empty && new_part.empty()) ) {
             result.push_back(new_part);
         }
     }
 
-    if( not (ignore_empty and tmp.empty()) ) {
+    if( !(ignore_empty && tmp.empty()) ) {
         result.push_back(tmp);
     }
 
